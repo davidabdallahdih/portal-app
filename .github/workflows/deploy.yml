@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '22' # Use a version compatible with your setup
+          node-version: '18.8' # Use a version compatible with your setup
 
       - name: Clean npm cache
         run: npm cache clean --force
