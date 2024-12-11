@@ -26,9 +26,7 @@ jobs:
           rm -f package-lock.json
 
       - name: Install Dependencies
-        run: |
-          npm install react-scripts@latest # or a specific version if needed
-          npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build Project
         run: npm run build
