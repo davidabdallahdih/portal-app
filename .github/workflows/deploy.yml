@@ -27,6 +27,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          npm install --legacy-peer-deps
           npm install ajv@latest # or a specific compatible version
           npm install ajv-keywords@latest # or a specific compatible version
           npm ci
