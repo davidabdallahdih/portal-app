@@ -26,7 +26,10 @@ jobs:
           rm -f package-lock.json
 
       - name: Install Dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+          npm install ajv@latest # or a specific compatible version
+          npm install ajv-keywords@latest # or a specific compatible version
+          npm ci
 
       - name: Build Project
         run: npm run build
