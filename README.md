@@ -48,7 +48,7 @@ cd poc-portal-app   `
 *   **Add Remote Repository**: Add your GitHub repository as a remote.
     
 ```bash
-git remote add origin https://github.com/your-username/your repo.git
+git remote add origin https://github.com/your-username/your-repo.git
 ```
 
 *   **Add and Commit Files**:
