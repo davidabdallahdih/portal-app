@@ -34,22 +34,30 @@ jobs:
 
       - name: Build Project
         run: npm run build
+        
+      - name: Authenticate with OIDC
+        uses: aws-actions/aws-oidc@v1
+        with:
+          oidc-url: ${{ secrets.OIDC_URL }}
+          role-arn: arn:aws:iam::533267328352:role/OIDCforGitHub # ARN of the IAM role you created
 
+      - name: Configure AWS Credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ steps.oidc.outputs.role-to-assume }}
+          aws-region: ${{ vars.AWS_REGION }}
+          
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
           args: --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           SOURCE_DIR: 'build'
           
       - name: Verify Deployment
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ vars.AWS_REGION }}
         run: aws s3 ls s3://${{ secrets.AWS_S3_BUCKET }}/
         
