@@ -5,12 +5,20 @@ on:
     branches:
       - main
 
+env:
+  BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }} # Use a secret for the bucket name
+  AWS_REGION: ${{ vars.AWS_REGION }} # Replace with your region.  Consider making this a secret if it's not fixed.
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -26,42 +34,36 @@ jobs:
           rm -f package-lock.json
 
       - name: Install Dependencies
-        run: npm ci
-
-      - name: Set AWS Region
-        run: echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
+        run: |
+          npm install --legacy-peer-deps
+          npm install ajv@latest 
+          npm install ajv-keywords@latest 
+          npm ci
 
       - name: Build Project
         run: npm run build
-        if: success() #added if condition
+        if: success()
 
-      - name: Authenticate with OIDC
-        uses: aws-actions/aws-oidc@v1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@d89e3bd43d5d909b47a18977aa9d5ce36cee184c # Use a specific version if needed
         with:
-          oidc-url: ${{ secrets.OIDC_URL }}
-          role-arn: arn:aws:iam::533267328352:role/OIDCforGitHub
-
-      - name: Configure AWS Credentials from OIDC
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ steps.oidc.outputs.role-to-assume }}
-          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} # Use a secret for the role ARN
+          role-session-name: deploy-react-app
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
-          args: --delete # Use cautiously!
+          args: --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           SOURCE_DIR: 'build'
-        if: success() #added if condition
+          
 
-      - name: Verify Deployment
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION }}
-        run: aws s3 ls s3://${{ secrets.AWS_S3_BUCKET }}/
-        if: success() #added if condition
+      - name: Verify Deployment (Optional)
+        run: aws s3 ls s3://${{ env.BUCKET_NAME }}/
+        if: success()
 
       - name: Display Website URL
-        run: echo "Your website is hosted at http://${{ secrets.AWS_S3_BUCKET }}.s3-website-${{ vars.AWS_REGION }}.amazonaws.com"
+        run: echo "Your website is hosted at http://${{ env.BUCKET_NAME }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
