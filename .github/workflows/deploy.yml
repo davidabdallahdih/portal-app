@@ -11,11 +11,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18.8' 
+          node-version: '18.8'
 
       - name: Clean npm cache
         run: npm cache clean --force
@@ -26,40 +26,42 @@ jobs:
           rm -f package-lock.json
 
       - name: Install Dependencies
-        run: |
-          npm install --legacy-peer-deps
-          npm install ajv@latest 
-          npm install ajv-keywords@latest 
-          npm ci
+        run: npm ci
+
+      - name: Set AWS Region
+        run: echo "AWS_REGION=${{ vars.AWS_REGION }}" >> $GITHUB_ENV
 
       - name: Build Project
         run: npm run build
-        
+        if: success() #added if condition
+
       - name: Authenticate with OIDC
         uses: aws-actions/aws-oidc@v1
         with:
           oidc-url: ${{ secrets.OIDC_URL }}
-          role-arn: arn:aws:iam::533267328352:role/OIDCforGitHub # ARN of the IAM role you created
+          role-arn: arn:aws:iam::533267328352:role/OIDCforGitHub
 
       - name: Configure AWS Credentials from OIDC
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ steps.oidc.outputs.role-to-assume }}
           aws-region: ${{ vars.AWS_REGION }}
-          
+
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
-          args: --delete
+          args: --delete # Use cautiously!
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_REGION: ${{ vars.AWS_REGION }}
           SOURCE_DIR: 'build'
-          
+        if: success() #added if condition
+
       - name: Verify Deployment
         env:
           AWS_REGION: ${{ vars.AWS_REGION }}
         run: aws s3 ls s3://${{ secrets.AWS_S3_BUCKET }}/
-        
+        if: success() #added if condition
+
       - name: Display Website URL
         run: echo "Your website is hosted at http://${{ secrets.AWS_S3_BUCKET }}.s3-website-${{ vars.AWS_REGION }}.amazonaws.com"
