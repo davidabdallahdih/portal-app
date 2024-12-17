@@ -45,7 +45,7 @@ jobs:
         if: success()
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@d89e3bd43d5d909b47a18977aa9d5ce36cee184c # Use a specific version if needed
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # Use a specific version if needed
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} # Use a secret for the role ARN
           role-session-name: deploy-react-app
