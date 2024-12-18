@@ -46,7 +46,12 @@ jobs:
           role-to-assume: arn:aws:iam::533267328352:role/dihrole
           role-session-name: deploy-react-app
           aws-region: us-east-2
-
+      - name: Print AWS Credentials (Debugging)
+        run: |
+         echo "AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID"
+         echo "AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY"
+         echo "AWS_SESSION_TOKEN: $AWS_SESSION_TOKEN"
+    
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
