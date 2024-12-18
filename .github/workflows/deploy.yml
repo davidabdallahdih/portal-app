@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-env:
-  BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }} # Use a secret for the bucket name
-  AWS_REGION: ${{ vars.AWS_REGION }} # Replace with your region.  Consider making this a secret if it's not fixed.
 
 permissions:
   id-token: write
@@ -42,14 +39,13 @@ jobs:
 
       - name: Build Project
         run: npm run build
-        if: success()
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} # Use a secret for the role ARN
+          role-to-assume: arn:aws:iam::533267328352:role/Github-Actions-Role
           role-session-name: deploy-react-app
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-2
 
       - name: Deploy to S3
         uses: jakejarvis/s3-sync-action@v0.5.1
