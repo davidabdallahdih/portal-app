@@ -43,7 +43,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::533267328352:role/dihrole
+          role-to-assume: arn:aws:iam::872515288376:role/octa-dih-role
           role-session-name: deploy-react-app
           aws-region: us-east-2
     
@@ -51,7 +51,7 @@ jobs:
         run: aws s3 sync ./build s3://$AWS_S3_BUCKET/ --delete
         env:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_REGION: us-east-2
+          AWS_REGION: eu-west-2
           
 
       - name: Verify Deployment (Optional)
